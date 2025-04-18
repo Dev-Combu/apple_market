@@ -78,7 +78,30 @@ class _HomePageState extends ConsumerState<HomePage> {
                           seller: result.seller,
                           price: result.price)));
             },
-            onLongPress: () {},
+            onLongPress: () {
+              showDialog(
+                context: context,
+                builder: (context) => AlertDialog(
+                  title: Text('상품 삭제'),
+                  content: Text('이 상품을 삭제하시겠습니까?'),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(), // 취소
+                      child: Text('취소'),
+                    ),
+                    TextButton(
+                      onPressed: () async {
+                        Navigator.of(context).pop();
+                        setState(() {
+                          state.removeAt(index);
+                        });
+                      },
+                      child: Text('삭제'),
+                    ),
+                  ],
+                ),
+              );
+            },
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Container(
