@@ -1,3 +1,4 @@
+import 'package:apple_market/utils/number_formatter.dart';
 import 'package:flutter/material.dart';
 
 class DetailPage extends StatefulWidget {
@@ -15,7 +16,7 @@ class DetailPage extends StatefulWidget {
   final String address;
   final String description;
   final String seller;
-  final String price;
+  final int price;
 
   @override
   State<DetailPage> createState() => _DetailPageState();
@@ -111,7 +112,7 @@ class _DetailPageState extends State<DetailPage> {
               child: Icon(Icons.favorite_border),
             ),
             Spacer(),
-            Text("${widget.price}원", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),),
+            Text(NumberFormatter.format(widget.price), style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),),
             SizedBox(width: 70),
             TextButton(
               onPressed: () {},
