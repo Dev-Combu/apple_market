@@ -2,7 +2,7 @@ import 'package:apple_market/data/model/product.dart';
 import 'package:apple_market/data/repository/product_repository.dart';
 import 'package:riverpod/riverpod.dart';
 
-class HomeViewModel extends Notifier<List<Product>>{
+class ProductViewModel extends Notifier<List<Product>>{
 
   final _productRepository = ProductRepository();
   
@@ -18,5 +18,5 @@ class HomeViewModel extends Notifier<List<Product>>{
 
 }
 
-final homeViewModel =
-    NotifierProvider<HomeViewModel, List<Product>>(() => HomeViewModel());
+final productViewModel =
+    NotifierProvider<ProductViewModel, List<Product>>(() => ProductViewModel());
