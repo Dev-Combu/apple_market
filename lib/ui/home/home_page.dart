@@ -67,7 +67,21 @@ class _HomePageState extends ConsumerState<HomePage> {
       appBar: AppBar(
         title: Text("르탄동"),
         centerTitle: false,
-        actions: [Icon(Icons.notifications_none)],
+        actions: [
+          IconButton(
+          icon : Icon(Icons.notifications_none),
+          onPressed: (){ //버튼을 눌렀을때
+          ScaffoldMessenger.of(context).showSnackBar( 
+              SnackBar(
+                content: Text('새로운 알람이 없습니다.'),
+                duration: Duration(seconds: 5),
+                action: SnackBarAction(
+                  label: '취소',
+                  onPressed: (){},
+                ),
+              )
+          );
+        })],
       ),
       body: ListView.builder(
         controller: _scrollController,
