@@ -7,8 +7,9 @@ class Product {
   final String seller;
   final int price;
   final String address;
-  final int likes;
+  int likes;
   final int chats;
+  bool isliked;
 
   Product({
     required this.id,
@@ -20,6 +21,7 @@ class Product {
     required this.address,
     required this.likes,
     required this.chats,
+    required this.isliked,
   });
 
   factory Product.fromCsv(List<dynamic> csvRow) {
@@ -33,6 +35,7 @@ class Product {
       address: csvRow[6].toString(),
       likes: int.parse(csvRow[7].toString()),
       chats: int.parse(csvRow[8].toString()),
+      isliked: csvRow[9].toString().toLowerCase() == 'false',
     );
   }
 }

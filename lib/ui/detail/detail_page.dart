@@ -1,15 +1,20 @@
+// ignore_for_file: avoid_print
+
 import 'package:apple_market/utils/number_formatter.dart';
 import 'package:flutter/material.dart';
 
 class DetailPage extends StatefulWidget {
-  const DetailPage(
-      {super.key,
-      required this.image,
-      required this.title,
-      required this.address,
-      required this.description,
-      required this.seller,
-      required this.price});
+  const DetailPage({
+    super.key,
+    required this.image,
+    required this.title,
+    required this.address,
+    required this.description,
+    required this.seller,
+    required this.price,
+    required this.likes,
+    required this.isliked,
+  });
 
   final String image;
   final String title;
@@ -17,18 +22,53 @@ class DetailPage extends StatefulWidget {
   final String description;
   final String seller;
   final int price;
+  final int likes;
+  final bool isliked;
 
   @override
   State<DetailPage> createState() => _DetailPageState();
 }
 
 class _DetailPageState extends State<DetailPage> {
+  late bool like;
+  late int _likes;
+
+  @override
+  void initState() {
+    super.initState();
+    like = widget.isliked;
+    _likes = widget.likes;
+  }
+
+  void _likesFunc() {
+  setState(() {
+    if (like) {
+      like = false;
+      _likes -= 1;
+    } else {
+      like = true;
+      _likes += 1;
+    }
+  });
+  
+}
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text("상품 상세"),
         centerTitle: false,
+        automaticallyImplyLeading: false,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pop(context, {
+              'isliked': like,
+              'likes': _likes,
+            });
+          },
+        ),
       ),
       body: SingleChildScrollView(
         scrollDirection: Axis.vertical,
@@ -40,7 +80,8 @@ class _DetailPageState extends State<DetailPage> {
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: Container(
-                decoration: BoxDecoration(border: Border(bottom: BorderSide())),
+                decoration: BoxDecoration(
+                    border: Border(bottom: BorderSide())),
                 child: SizedBox(
                   height: 80,
                   width: double.infinity,
@@ -70,7 +111,10 @@ class _DetailPageState extends State<DetailPage> {
                             ),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [Text(widget.address), Text("매너온도")],
+                              children: [
+                                Text(widget.address),
+                                Text("매너온도"),
+                              ],
                             )
                           ],
                         ),
@@ -89,8 +133,8 @@ class _DetailPageState extends State<DetailPage> {
                   children: [
                     Text(
                       widget.title,
-                      style:
-                          TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                          fontSize: 30, fontWeight: FontWeight.bold),
                     ),
                     Text(
                       widget.description,
@@ -109,10 +153,19 @@ class _DetailPageState extends State<DetailPage> {
           children: [
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Icon(Icons.favorite_border),
+              child: IconButton(
+                onPressed: _likesFunc,
+                icon: Icon(
+                  like ? Icons.favorite : Icons.favorite_border,
+                  color: like ? Colors.red : Colors.black,
+                ),
+              ),
             ),
             Spacer(),
-            Text(NumberFormatter.format(widget.price), style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),),
+            Text(
+              NumberFormatter.format(widget.price),
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
             SizedBox(width: 70),
             TextButton(
               onPressed: () {},
