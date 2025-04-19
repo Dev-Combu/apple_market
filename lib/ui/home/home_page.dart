@@ -1,3 +1,6 @@
+// ignore_for_file: avoid_print
+
+import 'package:apple_market/data/model/product.dart';
 import 'package:apple_market/ui/detail/detail_page.dart';
 import 'package:apple_market/ui/viewmodel/product_view_model.dart';
 import 'package:apple_market/utils/number_formatter.dart';
@@ -12,6 +15,7 @@ class HomePage extends ConsumerStatefulWidget {
 }
 
 class _HomePageState extends ConsumerState<HomePage> {
+
 // 상단이동 버튼이 표시(visible)되어야하는지 판단용 변수
   bool _showBackToTopButton = false;
 
@@ -20,6 +24,8 @@ class _HomePageState extends ConsumerState<HomePage> {
 
   // onpressed 상태
   bool buttonOnpressed = false;
+
+  List<Product> _localProducts = [];
 
   @override
   void initState() {
@@ -53,6 +59,10 @@ class _HomePageState extends ConsumerState<HomePage> {
   Widget build(BuildContext context) {
     final state = ref.watch(productViewModel);
 
+    if (_localProducts.isEmpty && state.isNotEmpty) {
+      _localProducts = List.from(state);
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: Text("르탄동"),
@@ -61,23 +71,48 @@ class _HomePageState extends ConsumerState<HomePage> {
       ),
       body: ListView.builder(
         controller: _scrollController,
-        itemCount: state.length,
+        itemCount: _localProducts.length,
         itemBuilder: (BuildContext context, int index) {
-          final result = state[index];
+          final result = _localProducts[index];
           return GestureDetector(
-            onTap: () {
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => DetailPage(
-                          image:
-                              "assets/sample_image/${result.imageFileName}.png",
-                          title: result.title,
-                          address: result.address,
-                          description: result.description,
-                          seller: result.seller,
-                          price: result.price)));
+            onTap: () async {
+              final updateResult = await Navigator.push<Map<String, dynamic>>(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => DetailPage(
+                    image: "assets/sample_image/${result.imageFileName}.png",
+                    title: result.title,
+                    address: result.address,
+                    description: result.description,
+                    seller: result.seller,
+                    price: result.price,
+                    likes: result.likes,
+                    isliked: result.isliked,
+                  ),
+                ),
+              );
+
+              if (updateResult != null) {
+                setState(() {
+                  final newIsLiked = updateResult['isliked'];
+                  final currentIsLiked = _localProducts[index].isliked;
+
+                  // 기존 isliked와 다를 때만 업데이트
+                  if (newIsLiked != currentIsLiked) {
+                    _localProducts[index].isliked = newIsLiked;
+
+                    if (newIsLiked) {
+                      _localProducts[index].likes += 1;
+                    } else {
+                      if (_localProducts[index].likes > 0) {
+                        _localProducts[index].likes -= 1;
+                      }
+                    }
+                  }
+                });
+              }
             },
+
             onLongPress: () {
               showDialog(
                 context: context,
@@ -102,69 +137,89 @@ class _HomePageState extends ConsumerState<HomePage> {
                 ),
               );
             },
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Container(
-                height: 120,
-                decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(8),
-                    color: Colors.white,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.grey.withValues(),
-                        blurRadius: 5.0,
-                        spreadRadius: 0.0,
-                        offset: const Offset(2, 2),
-                      )
-                    ]),
-                child: Row(
-                  children: [
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
-                      child: Image.asset(
-                          "assets/sample_image/${result.imageFileName}.png"),
-                    ),
-                    Expanded(
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          crossAxisAlignment: CrossAxisAlignment.start,
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Column(
+                    children: [
+                      Container(
+                        height: 120,
+                        decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(8),
+                            color: Colors.white,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.grey.withValues(),
+                                blurRadius: 5.0,
+                                spreadRadius: 0.0,
+                                offset: const Offset(2, 2),
+                              )
+                            ]),
+                        child: Row(
                           children: [
-                            Text(
-                              result.title,
-                              maxLines: 1,
-                              overflow: TextOverflow.clip,
-                              style: TextStyle(
-                                  fontSize: 16, fontWeight: FontWeight.bold),
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(8),
+                              child: Image.asset(
+                                  "assets/sample_image/${result.imageFileName}.png"),
                             ),
-                            Text(result.address),
-                            Text(
-                              NumberFormatter.format(result.price),
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
+                            Expanded(
+                              child: Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      result.title,
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                          fontSize: 13, fontWeight: FontWeight.bold),
+                                    ),
+                                    Text(result.address),
+                                    Text(
+                                      NumberFormatter.format(result.price),
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.end,
+                                      children: [
+                                        Icon(Icons.forum),
+                                        SizedBox(width: 2),
+                                        Text(result.chats.toString()),
+                                        SizedBox(width: 10),
+                                        Icon(
+                                          result.isliked
+                                              ? Icons.favorite
+                                              : Icons.favorite_border,
+                                              color: result.isliked ? Colors.red : Colors.black,
+                                        ),
+                                        SizedBox(width: 2),
+                                        Text((result.likes).toString()),
+                                      ],
+                                    )
+                                  ],
+                                ),
                               ),
-                            ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              children: [
-                                Icon(Icons.forum),
-                                SizedBox(width: 2),
-                                Text(result.chats.toString()),
-                                SizedBox(width: 10),
-                                Icon(Icons.favorite_border),
-                                SizedBox(width: 2),
-                                Text(result.likes.toString()),
-                              ],
                             )
                           ],
                         ),
                       ),
-                    )
-                  ],
+                    ],
+                  ),
                 ),
-              ),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Divider(
+                    color: Colors.grey[300], // 연회색
+                    thickness: 1, // 선 두께
+                  ),
+                )
+              ],
             ),
           );
         },
